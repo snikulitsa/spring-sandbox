@@ -24,10 +24,6 @@ export class UserManagementDetail extends React.Component<IUserManagementDetailP
         <h2>
           User [<b>{user.login}</b>]
         </h2>
-        <Row size="md">
-          <dl className="jh-entity-details">
-          </dl>
-        </Row>
         <Button tag={Link} to="/admin/user-management" replace color="info">
           <FontAwesomeIcon icon="arrow-left" /> <span className="d-none d-md-inline">Back</span>
         </Button>

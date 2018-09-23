@@ -88,7 +88,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .and()
 
                 .authorizeRequests()
-                .antMatchers(HttpMethod.POST, "/api/registration/mail").permitAll();
+                .antMatchers(HttpMethod.POST, "/api/registration/mail").permitAll()
+                .anyRequest().authenticated();
     }
 
     @Override
