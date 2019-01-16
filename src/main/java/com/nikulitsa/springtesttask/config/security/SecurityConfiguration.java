@@ -3,7 +3,7 @@ package com.nikulitsa.springtesttask.config.security;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
+import org.springframework.ldap.core.support.LdapContextSource;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -12,9 +12,8 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.security.ldap.userdetails.LdapAuthoritiesPopulator;
+import org.springframework.security.ldap.userdetails.UserDetailsContextMapper;
 
 @Configuration
 @EnableWebSecurity
@@ -23,12 +22,21 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     private final UserDetailsService userDetailsService;
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
+    private final LdapContextSource contextSource;
+    private final UserDetailsContextMapper userDetailsContextMapper;
+    private final LdapAuthoritiesPopulator ldapAuthoritiesPopulator;
 
     @Autowired
     public SecurityConfiguration(UserDetailsService userDetailsService,
-                                 AuthenticationManagerBuilder authenticationManagerBuilder) {
+                                 AuthenticationManagerBuilder authenticationManagerBuilder,
+                                 LdapContextSource contextSource,
+                                 UserDetailsContextMapper userDetailsContextMapper,
+                                 LdapAuthoritiesPopulator ldapAuthoritiesPopulator) {
         this.userDetailsService = userDetailsService;
         this.authenticationManagerBuilder = authenticationManagerBuilder;
+        this.contextSource = contextSource;
+        this.userDetailsContextMapper = userDetailsContextMapper;
+        this.ldapAuthoritiesPopulator = ldapAuthoritiesPopulator;
     }
 
     @Bean
@@ -51,51 +59,71 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         return new AjaxLogoutSuccessHandler();
     }
 
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration corsConfiguration = new CorsConfiguration();
-        final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/api/**", corsConfiguration);
-        return source;
-    }
+//    @Bean
+//    public CorsConfigurationSource corsConfigurationSource() {
+//        CorsConfiguration corsConfiguration = new CorsConfiguration();
+//        final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+//        source.registerCorsConfiguration("/api/**", corsConfiguration);
+//        return source;
+//    }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.cors()
-                .and().csrf().disable()
+        http
+//                .cors()
+//                .and()
+            .csrf().disable()
+            .formLogin()
+            .loginProcessingUrl("/basicLogin")
+            .successHandler(ajaxAuthenticationSuccessHandler())
+            .failureHandler(ajaxAuthenticationFailureHandler())
+            .usernameParameter("username")
+            .passwordParameter("password")
+            .permitAll()
 
-                .formLogin()
-                .loginProcessingUrl("/api/authentication")
-                .successHandler(ajaxAuthenticationSuccessHandler())
-                .failureHandler(ajaxAuthenticationFailureHandler())
-                .usernameParameter("username")
-                .passwordParameter("password")
-                .permitAll()
+            .and()
 
-                .and()
+            .logout()
+            .logoutUrl("/basicLogout")
+            .logoutSuccessHandler(ajaxLogoutSuccessHandler())
+            .permitAll()
 
-                .logout()
-                .logoutUrl("/api/logout")
-                .logoutSuccessHandler(ajaxLogoutSuccessHandler())
-                .permitAll()
+            .and()
 
-                .and()
+            .headers()
+            .frameOptions()
+            .disable()
 
-                .headers()
-                .frameOptions()
-                .disable()
+            .and()
 
-                .and()
-
-                .authorizeRequests()
-                .antMatchers(HttpMethod.POST, "/api/registration/mail").permitAll()
-                .anyRequest().authenticated();
+            .authorizeRequests()
+            .antMatchers("/api/registration/mail").permitAll()
+            .anyRequest().authenticated();
     }
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+//        auth
+//            .userDetailsService(userDetailsService)
+//            .passwordEncoder(passwordEncoder());
+
         auth
-                .userDetailsService(userDetailsService)
-                .passwordEncoder(passwordEncoder());
+            .ldapAuthentication()
+//                .userSearchBase("")
+            .contextSource(contextSource)
+//                .userDnPatterns("uid={0},ou=people")
+//                .userDnPatterns("uid={0},CN=Users")
+//                .groupSearchBase("ou=groups")
+
+//                .groupSearchFilter("(member={0})")
+//                .userSearchFilter("(uid={0})")
+            .userSearchFilter("(sAMAccountName={0})")
+            .ldapAuthoritiesPopulator(ldapAuthoritiesPopulator)
+//            .userDetailsContextMapper(userDetailsContextMapper)
+
+//                .passwordCompare()
+//                .passwordEncoder(new LdapShaPasswordEncoder())
+//                .passwordAttribute("userPassword")
+        ;
     }
 }
