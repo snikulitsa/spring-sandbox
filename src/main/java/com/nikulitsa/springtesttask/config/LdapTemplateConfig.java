@@ -69,4 +69,8 @@ public class LdapTemplateConfig {
         ldapContextSource.setBaseEnvironmentProperties(baseEnvironmentProperties);
         return ldapContextSource;
     }
+
+    public String getBase() {
+        return this.base;
+    }
 }

@@ -97,33 +97,28 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
             .and()
 
             .authorizeRequests()
-            .antMatchers("/api/registration/mail").permitAll()
+            .antMatchers(
+                "/api/registration/mail",
+                "/ldap_test/**",
+                "/files/**"
+            ).permitAll()
             .anyRequest().authenticated();
     }
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-//        auth
-//            .userDetailsService(userDetailsService)
-//            .passwordEncoder(passwordEncoder());
+
 
         auth
             .ldapAuthentication()
-//                .userSearchBase("")
             .contextSource(contextSource)
-//                .userDnPatterns("uid={0},ou=people")
-//                .userDnPatterns("uid={0},CN=Users")
-//                .groupSearchBase("ou=groups")
+//            .userSearchFilter("(sAMAccountName={0})")
+            .userSearchFilter("(distinguishedName={0})")
+//            .ldapAuthoritiesPopulator(ldapAuthoritiesPopulator)
+            .userDetailsContextMapper(userDetailsContextMapper);
 
-//                .groupSearchFilter("(member={0})")
-//                .userSearchFilter("(uid={0})")
-            .userSearchFilter("(sAMAccountName={0})")
-            .ldapAuthoritiesPopulator(ldapAuthoritiesPopulator)
-//            .userDetailsContextMapper(userDetailsContextMapper)
-
-//                .passwordCompare()
-//                .passwordEncoder(new LdapShaPasswordEncoder())
-//                .passwordAttribute("userPassword")
-        ;
+        auth
+            .userDetailsService(userDetailsService)
+            .passwordEncoder(passwordEncoder());
     }
 }
