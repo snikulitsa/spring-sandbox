@@ -1,9 +1,10 @@
 package com.nikulitsa.springtesttask.config.security;
 
+import com.nikulitsa.springtesttask.config.ldap.LdapConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
+import org.springframework.ldap.core.support.LdapContextSource;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -12,9 +13,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.security.ldap.userdetails.UserDetailsContextMapper;
 
 @Configuration
 @EnableWebSecurity
@@ -22,13 +21,13 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     private final UserDetailsService userDetailsService;
-    private final AuthenticationManagerBuilder authenticationManagerBuilder;
+    private final LdapConfig ldapConfig;
 
     @Autowired
     public SecurityConfiguration(UserDetailsService userDetailsService,
-                                 AuthenticationManagerBuilder authenticationManagerBuilder) {
+                                 LdapConfig ldapConfig) {
         this.userDetailsService = userDetailsService;
-        this.authenticationManagerBuilder = authenticationManagerBuilder;
+        this.ldapConfig = ldapConfig;
     }
 
     @Bean
@@ -51,51 +50,64 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         return new AjaxLogoutSuccessHandler();
     }
 
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration corsConfiguration = new CorsConfiguration();
-        final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/api/**", corsConfiguration);
-        return source;
-    }
-
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.cors()
-                .and().csrf().disable()
+        http
+            .csrf().disable()
+            .formLogin()
+            .loginProcessingUrl("/basicLogin")
+            .successHandler(ajaxAuthenticationSuccessHandler())
+            .failureHandler(ajaxAuthenticationFailureHandler())
+            .usernameParameter("username")
+            .passwordParameter("password")
+            .permitAll()
 
-                .formLogin()
-                .loginProcessingUrl("/api/authentication")
-                .successHandler(ajaxAuthenticationSuccessHandler())
-                .failureHandler(ajaxAuthenticationFailureHandler())
-                .usernameParameter("username")
-                .passwordParameter("password")
-                .permitAll()
+            .and()
 
-                .and()
+            .logout()
+            .logoutUrl("/basicLogout")
+            .logoutSuccessHandler(ajaxLogoutSuccessHandler())
+            .permitAll()
 
-                .logout()
-                .logoutUrl("/api/logout")
-                .logoutSuccessHandler(ajaxLogoutSuccessHandler())
-                .permitAll()
+            .and()
 
-                .and()
+            .headers()
+            .frameOptions()
+            .disable()
 
-                .headers()
-                .frameOptions()
-                .disable()
+            .and()
 
-                .and()
-
-                .authorizeRequests()
-                .antMatchers(HttpMethod.POST, "/api/registration/mail").permitAll()
-                .anyRequest().authenticated();
+            .authorizeRequests()
+            .antMatchers(
+                "/api/registration/mail",
+                "/ldap_test/**",
+                "/files/**"
+            ).permitAll()
+            .anyRequest().authenticated();
     }
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+
+        for (int ldapContextNumber: LdapConfig.LDAP_CONTEXT_NUMBERS) {
+            if (ldapConfig.isLdapEnabled(ldapContextNumber)) {
+                LdapContextSource ldapContextSource = ldapConfig.getLdapContextSourceFromContext(ldapContextNumber);
+
+                String userSearchFilter = ldapConfig.getUserSearchFilter(ldapContextNumber);
+
+                UserDetailsContextMapper userDetailsContextMapper = ldapConfig
+                    .getUserDetailsContextMapperFromContext(ldapContextNumber);
+
+                auth
+                    .ldapAuthentication()
+                    .contextSource(ldapContextSource)
+                    .userSearchFilter(userSearchFilter)
+                    .userDetailsContextMapper(userDetailsContextMapper);
+            }
+        }
+
         auth
-                .userDetailsService(userDetailsService)
-                .passwordEncoder(passwordEncoder());
+            .userDetailsService(userDetailsService)
+            .passwordEncoder(passwordEncoder());
     }
 }
