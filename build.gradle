@@ -33,6 +33,7 @@ dependencies {
     compile("org.springframework.security:spring-security-ldap")
     compile("com.unboundid:unboundid-ldapsdk")
     compile('org.apache.commons:commons-lang3')
+    compile("org.springframework.boot:spring-boot-configuration-processor")
     runtime('org.springframework.boot:spring-boot-devtools')
     runtime('org.postgresql:postgresql')
     testCompile('org.springframework.boot:spring-boot-starter-test')

@@ -1,6 +1,8 @@
 package com.nikulitsa.springtesttask.web.controllers;
 
 import com.nikulitsa.springtesttask.services.ldap.LdapService;
+import com.nikulitsa.springtesttask.web.dto.ldap.LdapDnByUsernameRequest;
+import com.nikulitsa.springtesttask.web.dto.ldap.LdapTreeRequest;
 import com.nikulitsa.springtesttask.web.dto.ldap.LdapTreeResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,18 +29,23 @@ public class LdapTest {
         return ldapService.getAllUsers();
     }
 
-    @GetMapping("/mapDnFromUsername")
-    public String getDnByUsername(@RequestBody String username) {
-        return ldapService.getDnByUsername(username);
+    @GetMapping("/allDomains")
+    public List<String> allDomains() {
+        return ldapService.getAllDomains();
     }
 
-    @PostMapping("/getByDnBase")
-    public LdapTreeResponse getByDnBase(@RequestBody(required = false) String baseDn) {
-        return ldapService.getByDnBase(baseDn);
+    @PostMapping("/ldapObject")
+    public LdapTreeResponse getLdapObject(@RequestBody LdapTreeRequest request) {
+        return ldapService.getLdapObject(request);
+    }
+
+    @PostMapping("/mapDnFromUsername")
+    public String getDnByUsername(@RequestBody LdapDnByUsernameRequest request) {
+        return ldapService.getDnByUsername(request);
     }
 
     @PostMapping("/groupMembers")
-    public List<String> getGroupMembers(@RequestBody(required = false) String groupDn) {
-        return ldapService.getGroupMembers(groupDn);
+    public List<String> getGroupMembers(@RequestBody LdapTreeRequest request) {
+        return ldapService.getGroupMembers(request);
     }
 }

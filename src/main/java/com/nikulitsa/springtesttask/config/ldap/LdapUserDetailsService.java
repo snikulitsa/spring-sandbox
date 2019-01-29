@@ -1,4 +1,4 @@
-package com.nikulitsa.springtesttask.config.security;
+package com.nikulitsa.springtesttask.config.ldap;
 
 import com.nikulitsa.springtesttask.services.ldap.LdapMapperFabric;
 import com.nikulitsa.springtesttask.services.ldap.LdapQueryFabric;
@@ -12,13 +12,12 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.ldap.userdetails.UserDetailsContextMapper;
-import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 
-@Component("ldapUserDetailsService")
 public class LdapUserDetailsService implements UserDetailsContextMapper {
 
     private static final Logger LOG = LoggerFactory.getLogger(LdapUserDetailsService.class);
@@ -40,29 +39,21 @@ public class LdapUserDetailsService implements UserDetailsContextMapper {
                                           String username,
                                           Collection<? extends GrantedAuthority> authorities) {
 
-        Object userPassword = ctx.getObjectAttribute("userPassword");
-        String passwd = userPassword != null
-            ? (String) userPassword
-            : "";
-
-        GrantedAuthority mockRole = new SimpleGrantedAuthority("MOCK_ROLE");
-        List<GrantedAuthority> mockRoles = new ArrayList<>(1);
-        mockRoles.add(mockRole);
+        List<GrantedAuthority> roles = new LinkedList<>();
 
         List<? extends GrantedAuthority> groupCnAuthorities = ldapTemplate.search(
             ldapQueryFabric.groupsByMember(username),
             ldapMapperFabric.groupCnMapper()
         );
 
-        mockRoles.addAll(groupCnAuthorities);
+        roles.addAll(groupCnAuthorities);
+        roles.addAll(authorities);
 
-        //TODO this is mock
-        User user = new User(username, passwd, mockRoles);
-        String msg = "\n=====================\n"
+        User user = new User(username, "", roles);
+        String msg = "\n==================================================================================\n"
             + "Username: " + user.getUsername() + "\n"
-            + "Password: " + user.getPassword() + "\n"
             + "Roles: " + user.getAuthorities()
-            + "\n=====================";
+            + "\n==================================================================================";
         LOG.debug(msg);
         return user;
     }

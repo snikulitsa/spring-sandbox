@@ -1,6 +1,6 @@
 package com.nikulitsa.springtesttask.services.ldap;
 
-import org.springframework.beans.factory.annotation.Value;
+import com.nikulitsa.springtesttask.config.ldap.properties.AbstractLdapProperties;
 import org.springframework.ldap.query.ContainerCriteria;
 import org.springframework.ldap.query.SearchScope;
 import org.springframework.stereotype.Component;
@@ -13,46 +13,52 @@ public class LdapQueryFabric {
     private static final String OBJECT_CATEGORY = "objectCategory";
     private static final String OBJECT_CLASS = "objectClass";
     private static final String DISTINGUISHED_NAME = "distinguishedName";
+    private static final String GROUP = "group";
+    private static final String CONTAINER = "container";
 
-    @Value("${ldap.attributes.person_object_category}")
-    private String personsObjectCategory;
-
-    @Value("${ldap.attributes.organizational_unit_object_class}")
-    private String organizationalUnitObjectClass;
-
-    public ContainerCriteria personsQuery(String baseDn) {
+    public ContainerCriteria personsQuery(String baseDn, AbstractLdapProperties ldapProperties) {
         return query()
             .base(baseDn)
             .searchScope(SearchScope.ONELEVEL)
-            .where(OBJECT_CATEGORY).is(personsObjectCategory);
+            .where(OBJECT_CATEGORY)
+            .is(ldapProperties.getAttributes().getPerson_object_category());
     }
 
-    public ContainerCriteria organizationalUnitsQuery(String baseDn) {
+    public ContainerCriteria organizationalUnitsQuery(String baseDn, AbstractLdapProperties ldapProperties) {
         return query()
             .base(baseDn)
             .searchScope(SearchScope.ONELEVEL)
-            .where(OBJECT_CLASS).is(organizationalUnitObjectClass);
+            .where(OBJECT_CLASS)
+            .is(ldapProperties.getAttributes().getOrganizational_unit_object_class());
     }
 
     public ContainerCriteria groupsQuery(String baseDn) {
         return query()
             .base(baseDn)
             .searchScope(SearchScope.ONELEVEL)
-            .where(OBJECT_CATEGORY).is("group");
+            .where(OBJECT_CATEGORY).is(GROUP);
     }
 
     public ContainerCriteria containersQuery(String baseDn) {
         return query()
             .base(baseDn)
             .searchScope(SearchScope.ONELEVEL)
-            .where(OBJECT_CLASS).is("container");
+            .where(OBJECT_CLASS).is(CONTAINER);
+    }
+
+    public ContainerCriteria dnByUsername(String username, AbstractLdapProperties ldapProperties) {
+        return whereAttributeIs(ldapProperties.getAttributes().getUsername(), username);
     }
 
     public ContainerCriteria groupsByMember(String memberDn) {
-        return query().where("member").is(memberDn);
+        return whereAttributeIs("member", memberDn);
     }
 
     public ContainerCriteria objectByDn(String objectDn) {
-        return query().where(DISTINGUISHED_NAME).is(objectDn);
+        return whereAttributeIs(DISTINGUISHED_NAME, objectDn);
+    }
+
+    public ContainerCriteria whereAttributeIs(String attribute, String value) {
+        return query().where(attribute).is(value);
     }
 }
