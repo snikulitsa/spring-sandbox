@@ -1,6 +1,7 @@
 buildscript {
     ext {
         springBootVersion = '2.0.5.RELEASE'
+        kerberosVersion = "1.0.1.RELEASE"
     }
     repositories {
         mavenCentral()
@@ -29,9 +30,15 @@ dependencies {
     compile('org.springframework.boot:spring-boot-starter-mail')
     compile('org.springframework.boot:spring-boot-starter-security')
     compile('org.springframework.boot:spring-boot-starter-web')
+
     compile("org.springframework.ldap:spring-ldap-core")
     compile("org.springframework.security:spring-security-ldap")
     compile("com.unboundid:unboundid-ldapsdk")
+
+    compile("org.springframework.security.kerberos:spring-security-kerberos-core:${kerberosVersion}")
+    compile("org.springframework.security.kerberos:spring-security-kerberos-web:${kerberosVersion}")
+    compile("org.springframework.security.kerberos:spring-security-kerberos-client:${kerberosVersion}")
+
     compile('org.apache.commons:commons-lang3')
     compile("org.springframework.boot:spring-boot-configuration-processor")
     runtime('org.springframework.boot:spring-boot-devtools')

@@ -60,7 +60,7 @@ public class LdapConfig {
     public UserDetailsContextMapper userDetailsContextMapper_1(LdapQueryFabric ldapQueryFabric,
                                                                LdapMapperFabric ldapMapperFabric) {
 
-        return new LdapUserDetailsService(ldapTemplate_1(), ldapQueryFabric, ldapMapperFabric);
+        return new LdapUserDetailsContextMapper(ldapTemplate_1(), ldapQueryFabric, ldapMapperFabric);
     }
 
     //LDAP context_2
@@ -79,7 +79,7 @@ public class LdapConfig {
     public UserDetailsContextMapper userDetailsContextMapper_2(LdapQueryFabric ldapQueryFabric,
                                                                LdapMapperFabric ldapMapperFabric) {
 
-        return new LdapUserDetailsService(ldapTemplate_2(), ldapQueryFabric, ldapMapperFabric);
+        return new LdapUserDetailsContextMapper(ldapTemplate_2(), ldapQueryFabric, ldapMapperFabric);
     }
 
     private LdapContextSource getLdapContextSource(AbstractLdapProperties ldapProperties) {

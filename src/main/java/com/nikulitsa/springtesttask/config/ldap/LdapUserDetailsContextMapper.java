@@ -8,27 +8,25 @@ import org.springframework.ldap.core.DirContextAdapter;
 import org.springframework.ldap.core.DirContextOperations;
 import org.springframework.ldap.core.LdapTemplate;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.ldap.userdetails.UserDetailsContextMapper;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
-public class LdapUserDetailsService implements UserDetailsContextMapper {
+public class LdapUserDetailsContextMapper implements UserDetailsContextMapper {
 
-    private static final Logger LOG = LoggerFactory.getLogger(LdapUserDetailsService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(LdapUserDetailsContextMapper.class);
 
     private final LdapTemplate ldapTemplate;
     private final LdapQueryFabric ldapQueryFabric;
     private final LdapMapperFabric ldapMapperFabric;
 
-    public LdapUserDetailsService(LdapTemplate ldapTemplate,
-                                  LdapQueryFabric ldapQueryFabric,
-                                  LdapMapperFabric ldapMapperFabric) {
+    public LdapUserDetailsContextMapper(LdapTemplate ldapTemplate,
+                                        LdapQueryFabric ldapQueryFabric,
+                                        LdapMapperFabric ldapMapperFabric) {
         this.ldapTemplate = ldapTemplate;
         this.ldapQueryFabric = ldapQueryFabric;
         this.ldapMapperFabric = ldapMapperFabric;
