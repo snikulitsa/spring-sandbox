@@ -1,10 +1,12 @@
 package com.nikulitsa.springtesttask.config.security;
 
-import com.nikulitsa.springtesttask.config.ldap.LdapConfig;
+import com.nikulitsa.springtesttask.config.activedirectory.ActiveDirectoryConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.ldap.core.support.LdapContextSource;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -13,7 +15,11 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.kerberos.authentication.KerberosServiceAuthenticationProvider;
+import org.springframework.security.kerberos.web.authentication.SpnegoAuthenticationProcessingFilter;
+import org.springframework.security.kerberos.web.authentication.SpnegoEntryPoint;
 import org.springframework.security.ldap.userdetails.UserDetailsContextMapper;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -21,13 +27,19 @@ import org.springframework.security.ldap.userdetails.UserDetailsContextMapper;
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     private final UserDetailsService userDetailsService;
-    private final LdapConfig ldapConfig;
+    private final KerberosServiceAuthenticationProvider kerberosServiceAuthenticationProvider;
+    private final SpnegoAuthenticationProcessingFilter spnegoAuthenticationProcessingFilter;
+    private final ActiveDirectoryConfig activeDirectoryConfig;
 
     @Autowired
     public SecurityConfiguration(UserDetailsService userDetailsService,
-                                 LdapConfig ldapConfig) {
+                                 KerberosServiceAuthenticationProvider kerberosServiceAuthenticationProvider,
+                                 @Lazy SpnegoAuthenticationProcessingFilter spnegoAuthenticationProcessingFilter,
+                                 ActiveDirectoryConfig activeDirectoryConfig) {
         this.userDetailsService = userDetailsService;
-        this.ldapConfig = ldapConfig;
+        this.kerberosServiceAuthenticationProvider = kerberosServiceAuthenticationProvider;
+        this.spnegoAuthenticationProcessingFilter = spnegoAuthenticationProcessingFilter;
+        this.activeDirectoryConfig = activeDirectoryConfig;
     }
 
     @Bean
@@ -52,10 +64,21 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+
+        if (activeDirectoryConfig.isKerberosEnabled()) {
+            http
+                .exceptionHandling()
+                .authenticationEntryPoint(new SpnegoEntryPoint())
+                .and()
+                .addFilterBefore(spnegoAuthenticationProcessingFilter, BasicAuthenticationFilter.class);
+        }
+
         http
+
             .csrf().disable()
             .formLogin()
-            .loginProcessingUrl("/basicLogin")
+//            .loginPage("/login")
+            .loginProcessingUrl("/login")
             .successHandler(ajaxAuthenticationSuccessHandler())
             .failureHandler(ajaxAuthenticationFailureHandler())
             .usernameParameter("username")
@@ -65,7 +88,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
             .and()
 
             .logout()
-            .logoutUrl("/basicLogout")
+            .logoutUrl("/logout")
             .logoutSuccessHandler(ajaxLogoutSuccessHandler())
             .permitAll()
 
@@ -83,20 +106,23 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 "/ldap_test/**",
                 "/files/**"
             ).permitAll()
-            .anyRequest().authenticated();
+            .anyRequest().authenticated()
+        ;
+
+
     }
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
 
-        for (int ldapContextNumber: LdapConfig.LDAP_CONTEXT_NUMBERS) {
-            if (ldapConfig.isLdapEnabled(ldapContextNumber)) {
-                LdapContextSource ldapContextSource = ldapConfig.getLdapContextSourceFromContext(ldapContextNumber);
+        for (int adNumber : ActiveDirectoryConfig.LDAP_CONTEXT_NUMBERS) {
+            if (activeDirectoryConfig.isLdapEnabled(adNumber)) {
+                LdapContextSource ldapContextSource = activeDirectoryConfig.getLdapContextSourceFromContext(adNumber);
 
-                String userSearchFilter = ldapConfig.getUserSearchFilter(ldapContextNumber);
+                String userSearchFilter = activeDirectoryConfig.getUserSearchFilter(adNumber);
 
-                UserDetailsContextMapper userDetailsContextMapper = ldapConfig
-                    .getUserDetailsContextMapperFromContext(ldapContextNumber);
+                UserDetailsContextMapper userDetailsContextMapper = activeDirectoryConfig
+                    .getUserDetailsContextMapperFromContext(adNumber);
 
                 auth
                     .ldapAuthentication()
@@ -109,5 +135,16 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         auth
             .userDetailsService(userDetailsService)
             .passwordEncoder(passwordEncoder());
+
+        if (activeDirectoryConfig.isKerberosEnabled()) {
+            auth
+                .authenticationProvider(kerberosServiceAuthenticationProvider);
+        }
+    }
+
+    @Bean
+    @Override
+    public AuthenticationManager authenticationManagerBean() throws Exception {
+        return super.authenticationManagerBean();
     }
 }
