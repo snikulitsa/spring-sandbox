@@ -1,7 +1,7 @@
 package com.nikulitsa.springtesttask.services.ldap;
 
-import com.nikulitsa.springtesttask.config.ldap.LdapConfig;
-import com.nikulitsa.springtesttask.config.ldap.properties.AbstractLdapProperties;
+import com.nikulitsa.springtesttask.config.activedirectory.ActiveDirectoryConfig;
+import com.nikulitsa.springtesttask.config.activedirectory.properties.AbstractActiveDirectoryProperties;
 import com.nikulitsa.springtesttask.web.dto.ldap.LdapDnByUsernameRequest;
 import com.nikulitsa.springtesttask.web.dto.ldap.LdapTreeRequest;
 import com.nikulitsa.springtesttask.web.dto.ldap.LdapTreeResponse;
@@ -19,14 +19,14 @@ import java.util.List;
 @Service
 public class LdapService {
 
-    private final LdapConfig ldapConfig;
+    private final ActiveDirectoryConfig activeDirectoryConfig;
     private final LdapQueryFabric ldapQueryFabric;
     private final LdapMapperFabric ldapMapperFabric;
 
-    public LdapService(LdapConfig ldapConfig,
+    public LdapService(ActiveDirectoryConfig activeDirectoryConfig,
                        LdapQueryFabric ldapQueryFabric,
                        LdapMapperFabric ldapMapperFabric) {
-        this.ldapConfig = ldapConfig;
+        this.activeDirectoryConfig = activeDirectoryConfig;
         this.ldapQueryFabric = ldapQueryFabric;
         this.ldapMapperFabric = ldapMapperFabric;
     }
@@ -35,9 +35,9 @@ public class LdapService {
 
         List<String> allUsers = new LinkedList<>();
 
-        for (int ldapContextNumber : LdapConfig.LDAP_CONTEXT_NUMBERS) {
-            if (ldapConfig.isLdapEnabled(ldapContextNumber)) {
-                LdapTemplate ldapTemplate = ldapConfig.getLdapTemplateFromContext(ldapContextNumber);
+        for (int ldapContextNumber : ActiveDirectoryConfig.LDAP_CONTEXT_NUMBERS) {
+            if (activeDirectoryConfig.isLdapEnabled(ldapContextNumber)) {
+                LdapTemplate ldapTemplate = activeDirectoryConfig.getLdapTemplateFromContext(ldapContextNumber);
                 List<String> search = ldapTemplate.search(
                     "",
                     "(objectCategory=person)",
@@ -46,7 +46,7 @@ public class LdapService {
                 String header =
                     "<li>###########################################"
                         + "####################################################</li>\n"
-                        + "<li>#   " + ldapConfig.getBase(ldapContextNumber) + "  #</li>\n"
+                        + "<li>#   " + activeDirectoryConfig.getBase(ldapContextNumber) + "  #</li>\n"
                         + "<li>############################################################"
                         + "###################################</li>\n";
                 allUsers.add(header);
@@ -66,9 +66,9 @@ public class LdapService {
         String groupDn = request.getDn();
         String domain = request.getDomain();
 
-        for (int ldapContextNumber : LdapConfig.LDAP_CONTEXT_NUMBERS) {
+        for (int ldapContextNumber : ActiveDirectoryConfig.LDAP_CONTEXT_NUMBERS) {
             if (domainMatch(domain, ldapContextNumber)) {
-                LdapTemplate ldapTemplate = ldapConfig.getLdapTemplateFromContext(ldapContextNumber);
+                LdapTemplate ldapTemplate = activeDirectoryConfig.getLdapTemplateFromContext(ldapContextNumber);
                 List<List<String>> search = ldapTemplate.search(
                     ldapQueryFabric.objectByDn(groupDn),
                     ldapMapperFabric.groupMembersMapper()
@@ -89,10 +89,10 @@ public class LdapService {
         String domain = request.getDomain();
         String username = request.getUsername();
 
-        for (int ldapContextNumber : LdapConfig.LDAP_CONTEXT_NUMBERS) {
+        for (int ldapContextNumber : ActiveDirectoryConfig.LDAP_CONTEXT_NUMBERS) {
             if (domainMatch(domain, ldapContextNumber)) {
-                LdapTemplate ldapTemplate = ldapConfig.getLdapTemplateFromContext(ldapContextNumber);
-                AbstractLdapProperties ldapProperties = ldapConfig.getLdapPropertiesFromContext(ldapContextNumber);
+                LdapTemplate ldapTemplate = activeDirectoryConfig.getLdapTemplateFromContext(ldapContextNumber);
+                AbstractActiveDirectoryProperties ldapProperties = activeDirectoryConfig.getActiveDirectoryPropertiesFromContext(ldapContextNumber);
                 List<String> search = ldapTemplate.search(
                     ldapQueryFabric.dnByUsername(username, ldapProperties),
                     ldapMapperFabric.dnMapper()
@@ -110,8 +110,8 @@ public class LdapService {
     public List<String> getAllDomains() {
         List<String> domains = new LinkedList<>();
 
-        for (int ldapContextNumber : LdapConfig.LDAP_CONTEXT_NUMBERS) {
-            AbstractLdapProperties ldapProperties = ldapConfig.getLdapPropertiesFromContext(ldapContextNumber);
+        for (int ldapContextNumber : ActiveDirectoryConfig.LDAP_CONTEXT_NUMBERS) {
+            AbstractActiveDirectoryProperties ldapProperties = activeDirectoryConfig.getActiveDirectoryPropertiesFromContext(ldapContextNumber);
             if (ldapProperties.isEnabled()) {
                 domains.add(ldapProperties.getBase());
             }
@@ -128,15 +128,15 @@ public class LdapService {
 
     public LdapTreeResponse getLdapObject(String domain, String dn) {
 
-        for (int ldapContextNumber : LdapConfig.LDAP_CONTEXT_NUMBERS) {
+        for (int ldapContextNumber : ActiveDirectoryConfig.LDAP_CONTEXT_NUMBERS) {
             if (domainMatch(domain, ldapContextNumber)) {
                 dn = prepareDn(dn, ldapContextNumber);
 
-                LdapTemplate ldapTemplate = ldapConfig
+                LdapTemplate ldapTemplate = activeDirectoryConfig
                     .getLdapTemplateFromContext(ldapContextNumber);
 
-                AbstractLdapProperties ldapProperties = ldapConfig
-                    .getLdapPropertiesFromContext(ldapContextNumber);
+                AbstractActiveDirectoryProperties ldapProperties = activeDirectoryConfig
+                    .getActiveDirectoryPropertiesFromContext(ldapContextNumber);
 
                 return getLdapObject(dn, ldapTemplate, ldapProperties);
             }
@@ -147,7 +147,7 @@ public class LdapService {
 
     private LdapTreeResponse getLdapObject(String dn,
                                            LdapTemplate ldapTemplate,
-                                           AbstractLdapProperties ldapProperties) {
+                                           AbstractActiveDirectoryProperties ldapProperties) {
 
         List<String> persons = ldapTemplate.search(
             ldapQueryFabric.personsQuery(dn, ldapProperties),
@@ -177,7 +177,7 @@ public class LdapService {
     }
 
     private boolean domainMatch(String domain, int contextNumber) {
-        return domain.equalsIgnoreCase(ldapConfig.getBase(contextNumber));
+        return domain.equalsIgnoreCase(activeDirectoryConfig.getBase(contextNumber));
     }
 
     private boolean searchSuccess(List list) {
@@ -194,7 +194,7 @@ public class LdapService {
 
     private String cutBase(String dn, int contextNumber) {
         LdapName ldapName = LdapUtils.newLdapName(dn);
-        LdapName base = LdapUtils.newLdapName(ldapConfig.getBase(contextNumber));
+        LdapName base = LdapUtils.newLdapName(activeDirectoryConfig.getBase(contextNumber));
         LdapName result = LdapUtils.removeFirst(ldapName, base);
         return result.toString();
     }

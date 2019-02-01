@@ -1,5 +1,8 @@
-package com.nikulitsa.springtesttask.config.ldap;
+package com.nikulitsa.springtesttask.config.activedirectory;
 
+import com.nikulitsa.springtesttask.config.userdetails.CustomUserDetails;
+import com.nikulitsa.springtesttask.config.userdetails.CustomUserDetailsImpl;
+import com.nikulitsa.springtesttask.config.userdetails.UserType;
 import com.nikulitsa.springtesttask.services.ldap.LdapMapperFabric;
 import com.nikulitsa.springtesttask.services.ldap.LdapQueryFabric;
 import org.slf4j.Logger;
@@ -8,7 +11,6 @@ import org.springframework.ldap.core.DirContextAdapter;
 import org.springframework.ldap.core.DirContextOperations;
 import org.springframework.ldap.core.LdapTemplate;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.ldap.userdetails.UserDetailsContextMapper;
 
@@ -33,9 +35,9 @@ public class LdapUserDetailsContextMapper implements UserDetailsContextMapper {
     }
 
     @Override
-    public UserDetails mapUserFromContext(DirContextOperations ctx,
-                                          String username,
-                                          Collection<? extends GrantedAuthority> authorities) {
+    public CustomUserDetails mapUserFromContext(DirContextOperations ctx,
+                                                String username,
+                                                Collection<? extends GrantedAuthority> authorities) {
 
         List<GrantedAuthority> roles = new LinkedList<>();
 
@@ -47,12 +49,9 @@ public class LdapUserDetailsContextMapper implements UserDetailsContextMapper {
         roles.addAll(groupCnAuthorities);
         roles.addAll(authorities);
 
-        User user = new User(username, "", roles);
-        String msg = "\n==================================================================================\n"
-            + "Username: " + user.getUsername() + "\n"
-            + "Roles: " + user.getAuthorities()
-            + "\n==================================================================================";
-        LOG.debug(msg);
+        CustomUserDetailsImpl user = new CustomUserDetailsImpl(username, "", roles);
+        setType(user);
+        log(user);
         return user;
     }
 
@@ -61,5 +60,22 @@ public class LdapUserDetailsContextMapper implements UserDetailsContextMapper {
         throw new UnsupportedOperationException(
             this.getClass().getSimpleName() + " does not support 'mapUserToContext' operation."
         );
+    }
+
+    protected void setType(CustomUserDetails user) {
+        user.setUserType(UserType.LDAP);
+    }
+
+    protected void log(CustomUserDetails user) {
+        String msg = getMsg(user);
+        LOG.debug(msg);
+    }
+
+    protected String getMsg(CustomUserDetails user) {
+        return "\n==================================================================================\n"
+            + "Username: " + user.getUsername() + "\n"
+            + "Roles: " + user.getAuthorities() + "\n"
+            + "UserType: " + user.getUserType()
+            + "\n==================================================================================";
     }
 }

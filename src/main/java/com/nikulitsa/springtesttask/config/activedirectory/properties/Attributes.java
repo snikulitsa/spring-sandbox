@@ -1,4 +1,4 @@
-package com.nikulitsa.springtesttask.config.ldap.properties;
+package com.nikulitsa.springtesttask.config.activedirectory.properties;
 
 public class Attributes {
 

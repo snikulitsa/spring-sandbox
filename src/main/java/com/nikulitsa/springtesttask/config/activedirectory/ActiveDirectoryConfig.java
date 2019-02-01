@@ -1,8 +1,8 @@
-package com.nikulitsa.springtesttask.config.ldap;
+package com.nikulitsa.springtesttask.config.activedirectory;
 
-import com.nikulitsa.springtesttask.config.ldap.properties.AbstractLdapProperties;
-import com.nikulitsa.springtesttask.config.ldap.properties.LdapProperties_1;
-import com.nikulitsa.springtesttask.config.ldap.properties.LdapProperties_2;
+import com.nikulitsa.springtesttask.config.activedirectory.properties.AbstractActiveDirectoryProperties;
+import com.nikulitsa.springtesttask.config.activedirectory.properties.ActiveDirectoryProperties_1;
+import com.nikulitsa.springtesttask.config.activedirectory.properties.ActiveDirectoryProperties_2;
 import com.nikulitsa.springtesttask.services.ldap.LdapMapperFabric;
 import com.nikulitsa.springtesttask.services.ldap.LdapQueryFabric;
 import org.slf4j.Logger;
@@ -19,35 +19,35 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
-public class LdapConfig {
+public class ActiveDirectoryConfig {
 
-    private static final Logger LOG = LoggerFactory.getLogger(LdapConfig.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ActiveDirectoryConfig.class);
 
     private static final String BINARY_ATTRIBUTES_KEY = "java.naming.ldap.attributes.binary";
     private static final String TIMEOUT_KEY = "com.sun.jndi.ldap.connect.timeout";
     public static final String LDAP_TEMPLATE_PREFIX = "ldapTemplate_";
-    public static final String LDAP_PROPERTIES_PREFIX = "ldapProperties_";
+    public static final String ACTIVE_DIRECTORY_PROPERTIES_PREFIX = "activeDirectoryProperties_";
     public static final String LDAP_CONTEXT_SOURCE_PREFIX = "ldapContextSource_";
     public static final String LDAP_USER_DETAILS_CONTEXT_MAPPER_PREFIX = "userDetailsContextMapper_";
 
     public static final int[] LDAP_CONTEXT_NUMBERS = {1, 2};
-    private final LdapProperties_1 ldapProperties_1;
-    private final LdapProperties_2 ldapProperties_2;
+    private final ActiveDirectoryProperties_1 activeDirectoryProperties_1;
+    private final ActiveDirectoryProperties_2 activeDirectoryProperties_2;
 
     private final ApplicationContext applicationContext;
 
-    public LdapConfig(LdapProperties_1 ldapProperties_1,
-                      LdapProperties_2 ldapProperties_2,
-                      ApplicationContext applicationContext) {
-        this.ldapProperties_1 = ldapProperties_1;
-        this.ldapProperties_2 = ldapProperties_2;
+    public ActiveDirectoryConfig(ActiveDirectoryProperties_1 activeDirectoryProperties_1,
+                                 ActiveDirectoryProperties_2 activeDirectoryProperties_2,
+                                 ApplicationContext applicationContext) {
+        this.activeDirectoryProperties_1 = activeDirectoryProperties_1;
+        this.activeDirectoryProperties_2 = activeDirectoryProperties_2;
         this.applicationContext = applicationContext;
     }
 
     //LDAP context_1
     @Bean(name = LDAP_CONTEXT_SOURCE_PREFIX + 1)
     public LdapContextSource ldapContextSource_1() {
-        return getLdapContextSource(ldapProperties_1);
+        return getLdapContextSource(activeDirectoryProperties_1);
     }
 
     @Bean(name = LDAP_TEMPLATE_PREFIX + 1)
@@ -66,7 +66,7 @@ public class LdapConfig {
     //LDAP context_2
     @Bean(name = LDAP_CONTEXT_SOURCE_PREFIX + 2)
     public LdapContextSource ldapContextSource_2() {
-        return getLdapContextSource(ldapProperties_2);
+        return getLdapContextSource(activeDirectoryProperties_2);
     }
 
     @Bean(name = LDAP_TEMPLATE_PREFIX + 2)
@@ -82,7 +82,7 @@ public class LdapConfig {
         return new LdapUserDetailsContextMapper(ldapTemplate_2(), ldapQueryFabric, ldapMapperFabric);
     }
 
-    private LdapContextSource getLdapContextSource(AbstractLdapProperties ldapProperties) {
+    private LdapContextSource getLdapContextSource(AbstractActiveDirectoryProperties ldapProperties) {
         LdapContextSource ldapContextSource = new LdapContextSource();
         ldapContextSource.setUrl(ldapProperties.getUrl());
         if (ldapProperties.isEnabled()) {
@@ -91,7 +91,8 @@ public class LdapConfig {
         return ldapContextSource;
     }
 
-    private void configureLdapContext(LdapContextSource ldapContextSource, AbstractLdapProperties ldapProperties) {
+    private void configureLdapContext(LdapContextSource ldapContextSource,
+                                      AbstractActiveDirectoryProperties ldapProperties) {
 
         Map<String, Object> baseEnvironmentProperties = new HashMap<>();
         baseEnvironmentProperties.put(BINARY_ATTRIBUTES_KEY, ldapProperties.getAttributes().getBinary_attributes());
@@ -105,34 +106,49 @@ public class LdapConfig {
         ldapContextSource.setBaseEnvironmentProperties(baseEnvironmentProperties);
     }
 
-    public String getBase(int contextNumber) {
-        return getLdapPropertiesFromContext(contextNumber).getBase();
+    public String getBase(int adNumber) {
+        return getActiveDirectoryPropertiesFromContext(adNumber).getBase();
     }
 
-    public String getUserSearchFilter(int contextNumber) {
-        return getLdapPropertiesFromContext(contextNumber)
+    public String getUserSearchFilter(int adNumber) {
+        return getActiveDirectoryPropertiesFromContext(adNumber)
             .getUser()
             .getSearch_filter();
     }
 
-    public boolean isLdapEnabled(int contextNumber) {
-        return getLdapPropertiesFromContext(contextNumber).isEnabled();
+    public boolean isKerberosEnabled() {
+        boolean kerberosEnabled = getActiveDirectoryPropertiesFromContext(KerberosConfig.KERBEROS_AD_CONTEXT)
+            .getKerberos()
+            .isEnabled();
+
+        boolean ldapEnabled = isLdapEnabled(KerberosConfig.KERBEROS_AD_CONTEXT);
+
+        if (kerberosEnabled && !ldapEnabled) {
+            throw new IllegalStateException("If KERBEROS enabled ACTIVE DIRECTORY_1 must be enabled too.");
+        }
+
+        return kerberosEnabled;
     }
 
-    public AbstractLdapProperties getLdapPropertiesFromContext(int contextNumber) {
-        return (AbstractLdapProperties) applicationContext.getBean(LDAP_PROPERTIES_PREFIX + contextNumber);
+    public boolean isLdapEnabled(int adNumber) {
+        return getActiveDirectoryPropertiesFromContext(adNumber).isEnabled();
     }
 
-    public LdapTemplate getLdapTemplateFromContext(int ldapContextNumber) {
-        return (LdapTemplate) applicationContext.getBean(LDAP_TEMPLATE_PREFIX + ldapContextNumber);
+    public AbstractActiveDirectoryProperties getActiveDirectoryPropertiesFromContext(int adNumber) {
+        return (AbstractActiveDirectoryProperties) applicationContext
+            .getBean(ACTIVE_DIRECTORY_PROPERTIES_PREFIX + adNumber);
     }
 
-    public LdapContextSource getLdapContextSourceFromContext(int ldapContextNumber) {
-        return (LdapContextSource) applicationContext.getBean(LDAP_CONTEXT_SOURCE_PREFIX + ldapContextNumber);
+    public LdapTemplate getLdapTemplateFromContext(int adNumber) {
+        return (LdapTemplate) applicationContext.getBean(LDAP_TEMPLATE_PREFIX + adNumber);
     }
 
-    public UserDetailsContextMapper getUserDetailsContextMapperFromContext(int ldapContextNumber) {
+    public LdapContextSource getLdapContextSourceFromContext(int adNumber) {
+        return (LdapContextSource) applicationContext.getBean(LDAP_CONTEXT_SOURCE_PREFIX + adNumber);
+    }
+
+    public UserDetailsContextMapper getUserDetailsContextMapperFromContext(int adNumber) {
         return (UserDetailsContextMapper) applicationContext
-            .getBean(LDAP_USER_DETAILS_CONTEXT_MAPPER_PREFIX + ldapContextNumber);
+            .getBean(LDAP_USER_DETAILS_CONTEXT_MAPPER_PREFIX + adNumber);
     }
 }

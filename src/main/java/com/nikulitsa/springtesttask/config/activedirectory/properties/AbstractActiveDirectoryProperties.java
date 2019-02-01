@@ -1,6 +1,6 @@
-package com.nikulitsa.springtesttask.config.ldap.properties;
+package com.nikulitsa.springtesttask.config.activedirectory.properties;
 
-public abstract class AbstractLdapProperties {
+public abstract class AbstractActiveDirectoryProperties {
 
     private boolean enabled = false;
 
@@ -16,11 +16,13 @@ public abstract class AbstractLdapProperties {
 
     private final Attributes attributes = new Attributes();
 
+    private final Kerberos kerberos = new Kerberos();
+
     public boolean isEnabled() {
         return enabled;
     }
 
-    public AbstractLdapProperties setEnabled(boolean enabled) {
+    public AbstractActiveDirectoryProperties setEnabled(boolean enabled) {
         this.enabled = enabled;
         return this;
     }
@@ -29,7 +31,7 @@ public abstract class AbstractLdapProperties {
         return this.url;
     }
 
-    public AbstractLdapProperties setUrl(String url) {
+    public AbstractActiveDirectoryProperties setUrl(String url) {
         this.url = url;
         return this;
     }
@@ -38,7 +40,7 @@ public abstract class AbstractLdapProperties {
         return base;
     }
 
-    public AbstractLdapProperties setBase(String base) {
+    public AbstractActiveDirectoryProperties setBase(String base) {
         this.base = base;
         return this;
     }
@@ -47,7 +49,7 @@ public abstract class AbstractLdapProperties {
         return this.timeout;
     }
 
-    public AbstractLdapProperties setTimeout(String timeout) {
+    public AbstractActiveDirectoryProperties setTimeout(String timeout) {
         this.timeout = timeout;
         return this;
     }
@@ -60,12 +62,16 @@ public abstract class AbstractLdapProperties {
         return referral_mode;
     }
 
-    public AbstractLdapProperties setReferral_mode(String referral_mode) {
+    public AbstractActiveDirectoryProperties setReferral_mode(String referral_mode) {
         this.referral_mode = referral_mode;
         return this;
     }
 
     public Attributes getAttributes() {
         return attributes;
+    }
+
+    public Kerberos getKerberos() {
+        return kerberos;
     }
 }

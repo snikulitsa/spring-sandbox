@@ -1,6 +1,6 @@
 package com.nikulitsa.springtesttask.config.security;
 
-import com.nikulitsa.springtesttask.config.ldap.LdapConfig;
+import com.nikulitsa.springtesttask.config.activedirectory.ActiveDirectoryConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,17 +29,17 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     private final UserDetailsService userDetailsService;
     private final KerberosServiceAuthenticationProvider kerberosServiceAuthenticationProvider;
     private final SpnegoAuthenticationProcessingFilter spnegoAuthenticationProcessingFilter;
-    private final LdapConfig ldapConfig;
+    private final ActiveDirectoryConfig activeDirectoryConfig;
 
     @Autowired
     public SecurityConfiguration(UserDetailsService userDetailsService,
                                  KerberosServiceAuthenticationProvider kerberosServiceAuthenticationProvider,
                                  @Lazy SpnegoAuthenticationProcessingFilter spnegoAuthenticationProcessingFilter,
-                                 LdapConfig ldapConfig) {
+                                 ActiveDirectoryConfig activeDirectoryConfig) {
         this.userDetailsService = userDetailsService;
         this.kerberosServiceAuthenticationProvider = kerberosServiceAuthenticationProvider;
         this.spnegoAuthenticationProcessingFilter = spnegoAuthenticationProcessingFilter;
-        this.ldapConfig = ldapConfig;
+        this.activeDirectoryConfig = activeDirectoryConfig;
     }
 
     @Bean
@@ -64,11 +64,16 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http
-            .exceptionHandling()
-            .authenticationEntryPoint(new SpnegoEntryPoint())
 
-            .and()
+        if (activeDirectoryConfig.isKerberosEnabled()) {
+            http
+                .exceptionHandling()
+                .authenticationEntryPoint(new SpnegoEntryPoint())
+                .and()
+                .addFilterBefore(spnegoAuthenticationProcessingFilter, BasicAuthenticationFilter.class);
+        }
+
+        http
 
             .csrf().disable()
             .formLogin()
@@ -102,10 +107,6 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 "/files/**"
             ).permitAll()
             .anyRequest().authenticated()
-
-            .and()
-
-            .addFilterBefore(spnegoAuthenticationProcessingFilter, BasicAuthenticationFilter.class)
         ;
 
 
@@ -114,14 +115,14 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
 
-        for (int ldapContextNumber : LdapConfig.LDAP_CONTEXT_NUMBERS) {
-            if (ldapConfig.isLdapEnabled(ldapContextNumber)) {
-                LdapContextSource ldapContextSource = ldapConfig.getLdapContextSourceFromContext(ldapContextNumber);
+        for (int adNumber : ActiveDirectoryConfig.LDAP_CONTEXT_NUMBERS) {
+            if (activeDirectoryConfig.isLdapEnabled(adNumber)) {
+                LdapContextSource ldapContextSource = activeDirectoryConfig.getLdapContextSourceFromContext(adNumber);
 
-                String userSearchFilter = ldapConfig.getUserSearchFilter(ldapContextNumber);
+                String userSearchFilter = activeDirectoryConfig.getUserSearchFilter(adNumber);
 
-                UserDetailsContextMapper userDetailsContextMapper = ldapConfig
-                    .getUserDetailsContextMapperFromContext(ldapContextNumber);
+                UserDetailsContextMapper userDetailsContextMapper = activeDirectoryConfig
+                    .getUserDetailsContextMapperFromContext(adNumber);
 
                 auth
                     .ldapAuthentication()
@@ -135,8 +136,10 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
             .userDetailsService(userDetailsService)
             .passwordEncoder(passwordEncoder());
 
-        auth
-            .authenticationProvider(kerberosServiceAuthenticationProvider);
+        if (activeDirectoryConfig.isKerberosEnabled()) {
+            auth
+                .authenticationProvider(kerberosServiceAuthenticationProvider);
+        }
     }
 
     @Bean
