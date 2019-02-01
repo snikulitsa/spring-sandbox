@@ -2,10 +2,16 @@ package com.nikulitsa.springtesttask.services.ldap;
 
 import com.nikulitsa.springtesttask.config.activedirectory.ActiveDirectoryConfig;
 import com.nikulitsa.springtesttask.config.activedirectory.properties.AbstractActiveDirectoryProperties;
+import com.nikulitsa.springtesttask.entities.ldap.AbstractLdapEntity;
+import com.nikulitsa.springtesttask.entities.ldap.LdapGroup;
+import com.nikulitsa.springtesttask.entities.ldap.LdapObjectClass;
 import com.nikulitsa.springtesttask.web.dto.ldap.LdapDnByUsernameRequest;
+import com.nikulitsa.springtesttask.web.dto.ldap.LdapEntityByObjectGUIDRequest;
+import com.nikulitsa.springtesttask.web.dto.ldap.LdapTreeEntityResponse;
 import com.nikulitsa.springtesttask.web.dto.ldap.LdapTreeRequest;
 import com.nikulitsa.springtesttask.web.dto.ldap.LdapTreeResponse;
 import org.springframework.ldap.core.LdapTemplate;
+import org.springframework.ldap.filter.HardcodedFilter;
 import org.springframework.ldap.support.LdapUtils;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -15,6 +21,7 @@ import javax.persistence.EntityNotFoundException;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class LdapService {
@@ -74,7 +81,7 @@ public class LdapService {
                     ldapMapperFabric.groupMembersMapper()
                 );
 
-                if (searchSuccess(search)) {
+                if (LdapSearchUtils.searchSuccess(search)) {
                     return search.get(0);
                 }
             }
@@ -98,7 +105,7 @@ public class LdapService {
                     ldapMapperFabric.dnMapper()
                 );
 
-                if (searchSuccess(search)) {
+                if (LdapSearchUtils.searchSuccess(search)) {
                     return search.get(0);
                 }
             }
@@ -120,13 +127,58 @@ public class LdapService {
         return domains;
     }
 
+    public LdapTreeEntityResponse getLdapTreeEntityResponse(LdapTreeRequest request) {
+        String domain = request.getDomain();
+        String dn = request.getDn();
+        return getLdapTreeEntityResponse(domain, dn);
+    }
+
+    private LdapTreeEntityResponse getLdapTreeEntityResponse(String domain, String dn) {
+        for (int adContext : ActiveDirectoryConfig.LDAP_CONTEXT_NUMBERS) {
+            if (domainMatch(domain, adContext)) {
+                dn = prepareDn(dn, adContext);
+                LdapTemplate ldapTemplate = activeDirectoryConfig.getLdapTemplateFromContext(adContext);
+                return getLdapTreeEntityResponse(dn, ldapTemplate);
+            }
+        }
+
+        throw new EntityNotFoundException("Domain '" + domain + "' not present in system.");
+    }
+
+    private LdapTreeEntityResponse getLdapTreeEntityResponse(String dn, LdapTemplate ldapTemplate) {
+        return new LdapTreeEntityResponse()
+            .setLdapGroups(
+                search(LdapObjectClass.GROUP, ldapTemplate, dn)
+            )
+            .setLdapPersons(
+                search(LdapObjectClass.PERSON, ldapTemplate, dn)
+            )
+            .setLdapContainers(
+                search(LdapObjectClass.CONTAINER, ldapTemplate, dn)
+            )
+            .setBuiltinDomains(
+                search(LdapObjectClass.BUILTIN_DOMAIN, ldapTemplate, dn)
+            )
+            .setOrganizationalUnits(
+                search(LdapObjectClass.ORGANIZATIONAL_UNIT, ldapTemplate, dn)
+            );
+    }
+
+    private List<AbstractLdapEntity> search(LdapObjectClass ldapObjectClass, LdapTemplate ldapTemplate, String dn) {
+        return ldapTemplate.search(
+            ldapQueryFabric.ldapEntityQuery(dn, ldapObjectClass),
+            ldapMapperFabric.ldapEntityMapper(ldapObjectClass)
+        );
+    }
+
+
     public LdapTreeResponse getLdapObject(LdapTreeRequest request) {
         String domain = request.getDomain();
         String dn = request.getDn();
         return getLdapObject(domain, dn);
     }
 
-    public LdapTreeResponse getLdapObject(String domain, String dn) {
+    private LdapTreeResponse getLdapObject(String domain, String dn) {
 
         for (int ldapContextNumber : ActiveDirectoryConfig.LDAP_CONTEXT_NUMBERS) {
             if (domainMatch(domain, ldapContextNumber)) {
@@ -135,10 +187,7 @@ public class LdapService {
                 LdapTemplate ldapTemplate = activeDirectoryConfig
                     .getLdapTemplateFromContext(ldapContextNumber);
 
-                AbstractActiveDirectoryProperties ldapProperties = activeDirectoryConfig
-                    .getActiveDirectoryPropertiesFromContext(ldapContextNumber);
-
-                return getLdapObject(dn, ldapTemplate, ldapProperties);
+                return getLdapObject(dn, ldapTemplate);
             }
         }
 
@@ -146,16 +195,15 @@ public class LdapService {
     }
 
     private LdapTreeResponse getLdapObject(String dn,
-                                           LdapTemplate ldapTemplate,
-                                           AbstractActiveDirectoryProperties ldapProperties) {
+                                           LdapTemplate ldapTemplate) {
 
         List<String> persons = ldapTemplate.search(
-            ldapQueryFabric.personsQuery(dn, ldapProperties),
+            ldapQueryFabric.personsQuery(dn),
             ldapMapperFabric.dnMapper()
         );
 
         List<String> ou = ldapTemplate.search(
-            ldapQueryFabric.organizationalUnitsQuery(dn, ldapProperties),
+            ldapQueryFabric.organizationalUnitsQuery(dn),
             ldapMapperFabric.dnMapper()
         );
 
@@ -180,10 +228,6 @@ public class LdapService {
         return domain.equalsIgnoreCase(activeDirectoryConfig.getBase(contextNumber));
     }
 
-    private boolean searchSuccess(List list) {
-        return list != null && !list.isEmpty();
-    }
-
     private String prepareDn(String dn, int contextNumber) {
         if (dn != null) {
             return cutBase(dn, contextNumber);
@@ -197,5 +241,15 @@ public class LdapService {
         LdapName base = LdapUtils.newLdapName(activeDirectoryConfig.getBase(contextNumber));
         LdapName result = LdapUtils.removeFirst(ldapName, base);
         return result.toString();
+    }
+
+    public String getLdapEntityByObjectGUID(LdapEntityByObjectGUIDRequest request) {
+        LdapTemplate ldapTemplate = activeDirectoryConfig.getLdapTemplateFromContext(1);
+        byte[] objectGUID = request.getObjectGUID();
+        return ldapTemplate.search(
+            "",
+            ldapQueryFabric.ldapEntityByObjectGUIDQuery(objectGUID),
+            ldapMapperFabric.dnMapper()
+        ).get(0);
     }
 }
