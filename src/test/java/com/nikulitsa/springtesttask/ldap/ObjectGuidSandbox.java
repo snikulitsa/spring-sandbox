@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.ldap.core.LdapTemplate;
+import org.springframework.ldap.filter.HardcodedFilter;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.List;
@@ -42,29 +43,14 @@ public class ObjectGuidSandbox {
 
             System.out.println(abstractLdapEntity.getDn());
 
-            String objectGUID_1 = LdapSearchUtils.getObjectGUID(abstractLdapEntity.getObjectGuid());
-            String objectGUID_2 = LdapSearchUtils.getGUID(abstractLdapEntity.getObjectGuid());
+            String rfcObjectGUID = LdapSearchUtils.rfcObjectGUID(abstractLdapEntity.getObjectGuid());
 
-            ldapTemplate.search(
-                ldapQueryFabric.ldapEntityByObjectGUIDQuery(objectGUID_1),
+            List<String> search = ldapTemplate.search(
+                "", new HardcodedFilter("(objectGUID=" + rfcObjectGUID + ")").encode(),
                 ldapMapperFabric.dnMapper()
-            ).stream()
-                .findFirst()
-                .ifPresent(System.out::println);
+            );
 
-            ldapTemplate.search(
-                ldapQueryFabric.ldapEntityByObjectGUIDQuery(objectGUID_2),
-                ldapMapperFabric.dnMapper()
-            ).stream()
-                .findFirst()
-                .ifPresent(System.out::println);
-
-            ldapTemplate.search(
-                ldapQueryFabric.ldapEntityByObjectGUIDQuery(abstractLdapEntity.getObjectGuid()),
-                ldapMapperFabric.dnMapper()
-            ).stream()
-                .findFirst()
-                .ifPresent(System.out::println);
+            System.out.println(search);
         }
     }
 }

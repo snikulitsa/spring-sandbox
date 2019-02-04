@@ -1,4 +1,4 @@
-package com.nikulitsa.springtesttask.web.controllers;
+package com.nikulitsa.springtesttask.web.controllers.ldap;
 
 import com.nikulitsa.springtesttask.entities.ldap.AbstractLdapEntity;
 import com.nikulitsa.springtesttask.services.ldap.LdapService;
@@ -18,12 +18,12 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/ldap_test")
-public class LdapController {
+public class LdapTreeController {
 
     private final LdapService ldapService;
 
     @Autowired
-    public LdapController(LdapService ldapService) {
+    public LdapTreeController(LdapService ldapService) {
         this.ldapService = ldapService;
     }
 
@@ -35,11 +35,6 @@ public class LdapController {
     @GetMapping("/allDomains")
     public List<String> allDomains() {
         return ldapService.getAllDomains();
-    }
-
-    @PostMapping("/ldapObject")
-    public LdapTreeResponse getLdapObject(@RequestBody LdapTreeRequest request) {
-        return ldapService.getLdapObject(request);
     }
 
     @PostMapping("/ldapTreePart")
