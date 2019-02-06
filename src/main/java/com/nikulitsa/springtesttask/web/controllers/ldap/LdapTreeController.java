@@ -1,12 +1,10 @@
 package com.nikulitsa.springtesttask.web.controllers.ldap;
 
-import com.nikulitsa.springtesttask.entities.ldap.AbstractLdapEntity;
 import com.nikulitsa.springtesttask.services.ldap.LdapService;
 import com.nikulitsa.springtesttask.web.dto.ldap.LdapDnByUsernameRequest;
 import com.nikulitsa.springtesttask.web.dto.ldap.LdapEntityByObjectGUIDRequest;
 import com.nikulitsa.springtesttask.web.dto.ldap.LdapTreeEntityResponse;
 import com.nikulitsa.springtesttask.web.dto.ldap.LdapTreeRequest;
-import com.nikulitsa.springtesttask.web.dto.ldap.LdapTreeResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;

@@ -26,6 +26,7 @@ public class LdapGroupService {
 
     public LdapGroupFull getLdapGroupDetailsByObjectGUID(LdapEntityByObjectGUIDRequest request) {
 
+        //TODO Спринг коверкает этот запрос, переделать как внизу класса.
         byte[] objectGUID = request.getObjectGUID();
         List<LdapGroupFull> ldapGroupFulls = ldapTemplate.find(
             LdapSearchUtils.EMPTY_BASE_NAME,
@@ -47,3 +48,41 @@ public class LdapGroupService {
         return searchControls;
     }
 }
+
+//TODO
+/*
+public abstract class AbstractLdapEntityService<T> {
+
+
+public T getEntityByObjectGUID(LdapEntityByObjectGUIDRequest request, Class<T> clazz) {
+    byte[] objectGUID = request.getObjectGUID();
+    return ldapTemplate().searchForObject(
+        LdapExtendedUtils.EMPTY_BASE_NAME,
+        ldapQueryFabric().ldapEntityByBinaryObjectGUIDRawQuery(objectGUID).encode(),
+        ldapMapperFabric().objectDirectoryContextMapper(ldapTemplate(), clazz)
+    );
+}
+
+
+    public T getEntityByDN(String dn, Class<T> clazz) {
+        return ldapTemplate().findOne(
+            ldapQueryFabric().byDnQuery(dn),
+            clazz
+        );
+    }
+
+    protected abstract LdapTemplate ldapTemplate();
+
+    protected abstract LdapQueryFabric ldapQueryFabric();
+
+    protected abstract LdapMapperFabric ldapMapperFabric();
+}
+*/
+//=======================================================================================================
+/*
+    public <T> ContextMapper<T> objectDirectoryContextMapper(LdapTemplate ldapTemplate, Class<T> clazz) {
+        return ctx -> ldapTemplate
+            .getObjectDirectoryMapper()
+            .mapFromLdapDataEntry((DirContextOperations) ctx, clazz);
+    }
+*/

@@ -10,7 +10,7 @@ public enum LdapObjectClass {
 
     private final String value;
 
-    private LdapObjectClass(String value) {
+    LdapObjectClass(String value) {
         this.value = value;
     }
 
