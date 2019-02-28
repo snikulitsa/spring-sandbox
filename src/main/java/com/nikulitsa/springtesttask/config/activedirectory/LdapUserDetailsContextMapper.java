@@ -39,6 +39,8 @@ public class LdapUserDetailsContextMapper implements UserDetailsContextMapper {
                                                 String username,
                                                 Collection<? extends GrantedAuthority> authorities) {
 
+        username = prepareUsername(username);
+
         List<GrantedAuthority> roles = new LinkedList<>();
 
         List<? extends GrantedAuthority> groupCnAuthorities = ldapTemplate.search(
@@ -62,6 +64,10 @@ public class LdapUserDetailsContextMapper implements UserDetailsContextMapper {
         );
     }
 
+    protected String prepareUsername(String username){
+        return username;
+    }
+
     protected void setType(CustomUserDetails user) {
         user.setUserType(UserType.LDAP);
     }
@@ -77,5 +83,17 @@ public class LdapUserDetailsContextMapper implements UserDetailsContextMapper {
             + "Roles: " + user.getAuthorities() + "\n"
             + "UserType: " + user.getUserType()
             + "\n==================================================================================";
+    }
+
+    protected LdapTemplate getLdapTemplate() {
+        return ldapTemplate;
+    }
+
+    protected LdapQueryFabric getLdapQueryFabric() {
+        return ldapQueryFabric;
+    }
+
+    protected LdapMapperFabric getLdapMapperFabric() {
+        return ldapMapperFabric;
     }
 }

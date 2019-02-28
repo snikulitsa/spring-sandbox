@@ -1,9 +1,10 @@
-package com.nikulitsa.springtesttask.web.controllers;
+package com.nikulitsa.springtesttask.web.controllers.ldap;
 
 import com.nikulitsa.springtesttask.services.ldap.LdapService;
 import com.nikulitsa.springtesttask.web.dto.ldap.LdapDnByUsernameRequest;
+import com.nikulitsa.springtesttask.web.dto.ldap.LdapEntityByObjectGUIDRequest;
+import com.nikulitsa.springtesttask.web.dto.ldap.LdapTreeEntityResponse;
 import com.nikulitsa.springtesttask.web.dto.ldap.LdapTreeRequest;
-import com.nikulitsa.springtesttask.web.dto.ldap.LdapTreeResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,12 +16,12 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/ldap_test")
-public class LdapTest {
+public class LdapTreeController {
 
     private final LdapService ldapService;
 
     @Autowired
-    public LdapTest(LdapService ldapService) {
+    public LdapTreeController(LdapService ldapService) {
         this.ldapService = ldapService;
     }
 
@@ -34,9 +35,14 @@ public class LdapTest {
         return ldapService.getAllDomains();
     }
 
-    @PostMapping("/ldapObject")
-    public LdapTreeResponse getLdapObject(@RequestBody LdapTreeRequest request) {
-        return ldapService.getLdapObject(request);
+    @PostMapping("/ldapTreePart")
+    public LdapTreeEntityResponse getLdapTreeEntityResponse(@RequestBody LdapTreeRequest request) {
+        return ldapService.getLdapTreeEntityResponse(request);
+    }
+
+    @PostMapping("/dnByObjectGUID")
+    public String getLdapEntityByObjectGUID(@RequestBody LdapEntityByObjectGUIDRequest request) {
+        return ldapService.getLdapEntityByObjectGUID(request);
     }
 
     @PostMapping("/mapDnFromUsername")
