@@ -7,8 +7,6 @@ import org.springframework.ldap.core.ContextMapper;
 import org.springframework.ldap.core.LdapTemplate;
 import org.springframework.security.core.GrantedAuthority;
 
-import java.util.List;
-
 /**
  * @author Sergey Nikulitsa
  */
@@ -20,8 +18,6 @@ public interface LdapMapperFactory {
     AttributesMapper<String> debugMapper();
 
     AttributesMapper<? extends GrantedAuthority> groupCnMapper();
-
-    AttributesMapper<List<String>> groupMembersMapper();
 
     /**
      * Маппер, использующий Spring ODM для резолвинга полей.

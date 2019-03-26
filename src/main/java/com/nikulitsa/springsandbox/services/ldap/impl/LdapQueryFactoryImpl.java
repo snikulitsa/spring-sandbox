@@ -50,7 +50,7 @@ public class LdapQueryFactoryImpl implements LdapQueryFactory {
 
     @Override
     public ContainerCriteria dnByUsername(String username) {
-        return whereAttributeIs(LdapFields.S_AMA_ACCOUNT_NAME, username);
+        return whereAttributeIs(LdapFields.S_AM_ACCOUNT_NAME, username);
     }
 
     @Override

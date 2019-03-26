@@ -18,7 +18,6 @@ import javax.naming.ldap.LdapName;
 import java.util.List;
 
 import static com.nikulitsa.springsandbox.utils.ExceptionFactory.entityNotFoundExceptionSupplier;
-import static com.nikulitsa.springsandbox.utils.ExceptionFactory.usernameNotFoundExceptionSupplier;
 
 /**
  * @author Sergey Nikulitsa
@@ -43,32 +42,7 @@ public class LdapTreeServiceImpl implements LdapTreeService {
         this.ldapMapperFactory = ldapMapperFactory;
     }
 
-    public String getAllUsers() {
-
-        List<String> search = ldapTemplate.search(
-            "",
-            "(objectCategory=person)",
-            ldapMapperFactory.debugMapper()
-        );
-
-        return String.join(
-            "<li>====================================================================================</li>\n"
-                + "<li>====================================================================================</li>\n",
-            search
-        );
-    }
-
-    public String getUserDnByUsername(String username) {
-        List<String> search = ldapTemplate.search(
-            ldapQueryFactory.dnByUsername(username),
-            ldapMapperFactory.dnMapper()
-        );
-        return search.stream()
-            .findFirst()
-            .orElseThrow(usernameNotFoundExceptionSupplier(username));
-    }
-
-    public String getLdapEntityByObjectGUID(LdapEntityByObjectGUIDRequest request) {
+    public String getDnByObjectGUID(LdapEntityByObjectGUIDRequest request) {
         byte[] objectGUID = request.getObjectGUID();
         String filter = ldapQueryFactory.ldapEntityByBinaryObjectGUIDRawQuery(objectGUID).encode();
         List<String> search = ldapTemplate.search(

@@ -1,5 +1,7 @@
 package com.nikulitsa.springsandbox.config.activedirectory.properties;
 
+import com.nikulitsa.springsandbox.entities.ldap.LdapFields;
+
 /**
  * Часть настроек Active Directory с логином и паролем пользователя,
  * под которым приложение будет подключаться к LDAP.
@@ -19,9 +21,11 @@ public class User {
     private String password;
 
     /**
-     * LDAP запрос для поиска учетных записей пользователей в Active Directory.
+     * LDAP запрос для поиска учетных записей пользователей в Active Directory при авторизации по логину/паролю.
+     * Воркфлоу такой: сперва по sAMAccountName запрашивается DN, вход производится по DN
+     * чтобы не конфликтовать с DAO-логинами.
      */
-    private String searchFilter = "(distinguishedName={0})";
+    private String searchFilter = "(" + LdapFields.DISTINGUISHED_NAME + "={0})";
 
     public String getDn() {
         return dn;

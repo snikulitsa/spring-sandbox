@@ -113,7 +113,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
             .authorizeRequests()
             .antMatchers(
                 "/api/registration/mail",
-                "/ldap_test/**",
+                "/api/ldap/**",
                 "/files/**"
             ).permitAll()
             .anyRequest().authenticated();

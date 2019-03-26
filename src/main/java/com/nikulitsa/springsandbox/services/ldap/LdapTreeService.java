@@ -8,11 +8,7 @@ import com.nikulitsa.springsandbox.web.dto.ldap.LdapTreeEntityResponse;
  */
 public interface LdapTreeService {
 
-    String getAllUsers();
-
     LdapTreeEntityResponse getLdapTreeEntityResponse(String baseDn);
 
-    String getLdapEntityByObjectGUID(LdapEntityByObjectGUIDRequest request);
-
-    String getUserDnByUsername(String username);
+    String getDnByObjectGUID(LdapEntityByObjectGUIDRequest request);
 }

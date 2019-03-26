@@ -1,13 +1,13 @@
 package com.nikulitsa.springsandbox.services.ldap.impl;
 
+import com.nikulitsa.springsandbox.entities.ldap.LdapFields;
+import com.nikulitsa.springsandbox.entities.ldap.LdapObjectClass;
 import com.nikulitsa.springsandbox.entities.ldap.tree.AbstractLdapTreeEntity;
 import com.nikulitsa.springsandbox.entities.ldap.tree.LdapTreeBuiltinDomain;
 import com.nikulitsa.springsandbox.entities.ldap.tree.LdapTreeContainer;
-import com.nikulitsa.springsandbox.entities.ldap.LdapFields;
 import com.nikulitsa.springsandbox.entities.ldap.tree.LdapTreeGroup;
-import com.nikulitsa.springsandbox.entities.ldap.LdapObjectClass;
-import com.nikulitsa.springsandbox.entities.ldap.tree.LdapTreePerson;
 import com.nikulitsa.springsandbox.entities.ldap.tree.LdapTreeOrganizationalUnit;
+import com.nikulitsa.springsandbox.entities.ldap.tree.LdapTreePerson;
 import com.nikulitsa.springsandbox.services.ldap.LdapMapperFactory;
 import org.springframework.ldap.core.AttributesMapper;
 import org.springframework.ldap.core.ContextMapper;
@@ -19,9 +19,6 @@ import org.springframework.stereotype.Component;
 
 import javax.naming.NamingEnumeration;
 import javax.naming.directory.Attribute;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
 
 /**
  * @author Sergey Nikulitsa
@@ -85,23 +82,6 @@ public class LdapMapperFactoryImpl implements LdapMapperFactory {
                     .toUpperCase()
                     .replaceAll(" ", "_")
             );
-        };
-    }
-
-    @Override
-    public AttributesMapper<List<String>> groupMembersMapper() {
-        return attributes -> {
-            Attribute members = attributes.get(LdapFields.MEMBER);
-            if (members != null) {
-                List<String> membersList = new LinkedList<>();
-                NamingEnumeration<?> all = members.getAll();
-                while (all.hasMore()) {
-                    membersList.add((String) all.next());
-                }
-                return membersList;
-            } else {
-                return Collections.emptyList();
-            }
         };
     }
 

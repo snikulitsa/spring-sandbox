@@ -27,31 +27,14 @@ public class LdapTreeController {
         this.ldapTreeService = ldapTreeService;
     }
 
-    @GetMapping
-    public String getAllUsers() {
-        return ldapTreeService.getAllUsers();
-    }
-
     @GetMapping("/branch")
     public LdapTreeEntityResponse getLdapTreeEntityResponse(
-        @RequestParam(required = false, defaultValue = "") String baseDn) {
-        return ldapTreeService.getLdapTreeEntityResponse(baseDn);
+        @RequestParam(required = false, defaultValue = "") String dn) {
+        return ldapTreeService.getLdapTreeEntityResponse(dn);
     }
 
     @PostMapping("/dnByObjectGUID")
-    public String getLdapEntityByObjectGUID(@RequestBody LdapEntityByObjectGUIDRequest request) {
-        return ldapTreeService.getLdapEntityByObjectGUID(request);
+    public String dnByObjectGUID(@RequestBody LdapEntityByObjectGUIDRequest request) {
+        return ldapTreeService.getDnByObjectGUID(request);
     }
-
-    //TODO move to LdapUserController
-    @GetMapping("/mapDnFromUsername")
-    public String getDnByUsername(@RequestParam String username) {
-        return ldapTreeService.getUserDnByUsername(username);
-    }
-
-    //TODO move to LdapGroupController
-    //    @PostMapping("/groupMembers")
-    //    public List<String> getGroupMembers(@RequestBody LdapTreeRequest request) {
-    //        return ldapTreeService.getGroupMembers(request);
-    //    }
 }

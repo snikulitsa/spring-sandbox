@@ -15,7 +15,6 @@ public interface LdapFields {
     String PERSON = "person";
 
     //Attributes
-    String OBJECT_CATEGORY = "objectCategory";
     String OBJECT_CLASS = "objectClass";
     String DISTINGUISHED_NAME = "distinguishedName";
     String USER_PRINCIPAL_NAME = "userPrincipalName";
@@ -23,7 +22,12 @@ public interface LdapFields {
     String MEMBER_OF = "memberOf";
     String CN = "cn";
     String OBJECT_GUID = "objectGUID";
-    String S_AMA_ACCOUNT_NAME = "sAMAccountName";
+    String S_AM_ACCOUNT_NAME = "sAMAccountName";
     String NAME = "name";
     String DESCRIPTION = "description";
+    String FIRST_NAME = "givenName";
+    String LAST_NAME = "sn";
+    String MIDDLE_NAME = "initials";
+    String PHONE = "telephoneNumber";
+    String MAIL = "mail";
 }
