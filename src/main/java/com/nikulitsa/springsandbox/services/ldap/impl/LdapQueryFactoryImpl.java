@@ -49,23 +49,18 @@ public class LdapQueryFactoryImpl implements LdapQueryFactory {
     }
 
     @Override
-    public ContainerCriteria dnByUsername(String username) {
+    public ContainerCriteria byUsernameQuery(String username) {
         return whereAttributeIs(LdapFields.S_AM_ACCOUNT_NAME, username);
     }
 
     @Override
-    public ContainerCriteria dnByUserPrincipalName(String userPrincipalName) {
+    public ContainerCriteria byUserPrincipalNameQuery(String userPrincipalName) {
         return whereAttributeIs(LdapFields.USER_PRINCIPAL_NAME, userPrincipalName);
     }
 
     @Override
-    public ContainerCriteria groupsByMember(String memberDn) {
+    public ContainerCriteria byMemberQuery(String memberDn) {
         return whereAttributeIs(LdapFields.MEMBER, memberDn);
-    }
-
-    @Override
-    public ContainerCriteria objectByDn(String objectDn) {
-        return whereAttributeIs(LdapFields.DISTINGUISHED_NAME, objectDn);
     }
 
     @Override

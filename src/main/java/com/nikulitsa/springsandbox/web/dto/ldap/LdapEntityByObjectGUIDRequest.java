@@ -7,6 +7,9 @@ package com.nikulitsa.springsandbox.web.dto.ldap;
  */
 public class LdapEntityByObjectGUIDRequest {
 
+    /**
+     * Уникальный идентификатор объекта в LDAP.
+     */
     private byte[] objectGUID;
 
     public byte[] getObjectGUID() {

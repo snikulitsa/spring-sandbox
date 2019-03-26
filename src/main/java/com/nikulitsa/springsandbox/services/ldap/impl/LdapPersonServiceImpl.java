@@ -47,7 +47,7 @@ public class LdapPersonServiceImpl extends AbstractLdapEntityService<LdapPerson>
     @Override
     public String getUserDnByUsername(String username) {
         List<String> search = ldapTemplate().search(
-            ldapQueryFactory().dnByUsername(username),
+            ldapQueryFactory().byUsernameQuery(username),
             ldapMapperFactory().dnMapper()
         );
         return search.stream()

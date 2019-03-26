@@ -50,9 +50,15 @@ public final class LdapGroup {
     @Attribute(name = LdapFields.DESCRIPTION)
     private String description;
 
+    /**
+     * DN участников группы.
+     */
     @Attribute(name = LdapFields.MEMBER)
     private List<String> members = new ArrayList<>();
 
+    /**
+     * DN групп, в которых состоит группа.
+     */
     @Attribute(name = LdapFields.MEMBER_OF)
     private List<String> memberOf = new ArrayList<>();
 
@@ -78,40 +84,45 @@ public final class LdapGroup {
         return cn;
     }
 
-    public void setCn(String cn) {
+    public LdapGroup setCn(String cn) {
         this.cn = cn;
+        return this;
     }
 
     public String getDn() {
         return dn;
     }
 
-    public void setDn(String dn) {
+    public LdapGroup setDn(String dn) {
         this.dn = dn;
+        return this;
     }
 
     public String getDescription() {
         return description;
     }
 
-    public void setDescription(String description) {
+    public LdapGroup setDescription(String description) {
         this.description = description;
+        return this;
     }
 
     public List<String> getMembers() {
         return members;
     }
 
-    public void setMembers(List<String> members) {
+    public LdapGroup setMembers(List<String> members) {
         this.members = members;
+        return this;
     }
 
     public List<String> getMemberOf() {
         return memberOf;
     }
 
-    public void setMemberOf(List<String> memberOf) {
+    public LdapGroup setMemberOf(List<String> memberOf) {
         this.memberOf = memberOf;
+        return this;
     }
 
     @Override

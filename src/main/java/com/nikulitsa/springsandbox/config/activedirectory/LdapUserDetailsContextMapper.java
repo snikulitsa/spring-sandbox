@@ -46,7 +46,7 @@ public class LdapUserDetailsContextMapper implements UserDetailsContextMapper {
         List<GrantedAuthority> roles = new LinkedList<>();
 
         List<? extends GrantedAuthority> groupCnAuthorities = ldapTemplate.search(
-            ldapQueryFactory.groupsByMember(username),
+            ldapQueryFactory.byMemberQuery(username),
             ldapMapperFactory.groupCnMapper()
         );
 

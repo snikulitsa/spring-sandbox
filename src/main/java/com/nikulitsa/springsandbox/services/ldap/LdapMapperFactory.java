@@ -11,12 +11,27 @@ import org.springframework.security.core.GrantedAuthority;
  * @author Sergey Nikulitsa
  */
 public interface LdapMapperFactory {
+
+    /**
+     * Маппер, который заполняет и возвращает объект {@link AbstractLdapTreeEntity}.
+     *
+     * @param ldapObjectClass {@link LdapObjectClass}
+     */
     AttributesMapper<AbstractLdapTreeEntity> ldapTreeEntityMapper(LdapObjectClass ldapObjectClass);
 
+    /**
+     * Маппер, который достает аттрибут Distinguished Name.
+     */
     AttributesMapper<String> dnMapper();
 
+    /**
+     * Маппер, который достает всех пользователей.
+     */
     AttributesMapper<String> debugMapper();
 
+    /**
+     * Маппер, который из групп, в которых состоит пользователь создает {@link GrantedAuthority}.
+     */
     AttributesMapper<? extends GrantedAuthority> groupCnMapper();
 
     /**

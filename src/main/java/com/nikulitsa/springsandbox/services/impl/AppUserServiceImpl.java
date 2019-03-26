@@ -11,6 +11,7 @@ import java.util.Optional;
 
 /**
  * @author Sergey Nikulitsa
+ * @see AppUserService
  */
 @Service
 public class AppUserServiceImpl implements AppUserService {

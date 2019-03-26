@@ -12,6 +12,7 @@ import java.util.Optional;
 /**
  * @param <T> LDAP объект
  * @author Sergey Nikulitsa
+ * @see BaseLdapEntityService
  */
 public abstract class AbstractLdapEntityService<T> implements BaseLdapEntityService<T> {
 

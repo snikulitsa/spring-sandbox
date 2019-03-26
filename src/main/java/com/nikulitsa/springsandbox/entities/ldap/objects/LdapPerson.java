@@ -108,112 +108,126 @@ public final class LdapPerson {
         return id;
     }
 
-    public void setId(Name id) {
+    public LdapPerson setId(Name id) {
         this.id = id;
+        return this;
     }
 
     public byte[] getObjectGUID() {
         return objectGUID;
     }
 
-    public void setObjectGUID(byte[] objectGUID) {
+    public LdapPerson setObjectGUID(byte[] objectGUID) {
         this.objectGUID = objectGUID;
+        return this;
     }
 
     public String getFirstName() {
         return firstName;
     }
 
-    public void setFirstName(String firstName) {
+    public LdapPerson setFirstName(String firstName) {
         this.firstName = firstName;
+        return this;
     }
 
     public String getLastName() {
         return lastName;
     }
 
-    public void setLastName(String lastName) {
+    public LdapPerson setLastName(String lastName) {
         this.lastName = lastName;
+        return this;
     }
 
     public String getMiddleName() {
         return middleName;
     }
 
-    public void setMiddleName(String middleName) {
+    public LdapPerson setMiddleName(String middleName) {
         this.middleName = middleName;
+        return this;
     }
 
     public String getDescription() {
         return description;
     }
 
-    public void setDescription(String description) {
+    public LdapPerson setDescription(String description) {
         this.description = description;
+        return this;
     }
 
     public String getCn() {
         return cn;
     }
 
-    public void setCn(String cn) {
+    public LdapPerson setCn(String cn) {
         this.cn = cn;
+        return this;
     }
 
     public String getDn() {
         return dn;
     }
 
-    public void setDn(String dn) {
+    public LdapPerson setDn(String dn) {
         this.dn = dn;
+        return this;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public LdapPerson setName(String name) {
         this.name = name;
+        return this;
     }
 
     public String getAccountName() {
         return accountName;
     }
 
-    public void setAccountName(String accountName) {
+    public LdapPerson setAccountName(String accountName) {
         this.accountName = accountName;
+        return this;
     }
 
     public String getUserPrincipalName() {
         return userPrincipalName;
     }
 
-    public void setUserPrincipalName(String userPrincipalName) {
+    public LdapPerson setUserPrincipalName(String userPrincipalName) {
         this.userPrincipalName = userPrincipalName;
+        return this;
     }
 
     public List<String> getMemberOf() {
         return memberOf;
     }
 
-    public void setMemberOf(List<String> memberOf) {
+    public LdapPerson setMemberOf(List<String> memberOf) {
         this.memberOf = memberOf;
+        return this;
     }
 
     public String getPhone() {
         return phone;
     }
 
-    public void setPhone(String phone) {
+    public LdapPerson setPhone(String phone) {
         this.phone = phone;
+        return this;
     }
 
     public String getMail() {
         return mail;
     }
 
-    public void setMail(String mail) {
+    public LdapPerson setMail(String mail) {
         this.mail = mail;
+        return this;
     }
 
     @Override

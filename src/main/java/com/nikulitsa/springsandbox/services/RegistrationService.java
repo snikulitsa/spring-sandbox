@@ -7,5 +7,9 @@ package com.nikulitsa.springsandbox.services;
  */
 public interface RegistrationService {
 
+    /**
+     * Регистрация DAO пользователя по email.
+     * @param mail email пользователя
+     */
     void register(String mail);
 }

@@ -30,13 +30,11 @@ public interface LdapQueryFactory {
      */
     ContainerCriteria byDnQuery(String dn);
 
-    ContainerCriteria dnByUsername(String username);
+    ContainerCriteria byUsernameQuery(String username);
 
-    ContainerCriteria dnByUserPrincipalName(String userPrincipalName);
+    ContainerCriteria byUserPrincipalNameQuery(String userPrincipalName);
 
-    ContainerCriteria groupsByMember(String memberDn);
-
-    ContainerCriteria objectByDn(String objectDn);
+    ContainerCriteria byMemberQuery(String memberDn);
 
     ContainerCriteria whereAttributeIs(String attribute, String value);
 }
