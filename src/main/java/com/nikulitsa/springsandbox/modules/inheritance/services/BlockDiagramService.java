@@ -1,74 +1,35 @@
 package com.nikulitsa.springsandbox.modules.inheritance.services;
 
-import com.nikulitsa.springsandbox.modules.inheritance.dto.BlockDiagramDTO;
-import com.nikulitsa.springsandbox.modules.inheritance.entities.ActionFigure;
-import com.nikulitsa.springsandbox.modules.inheritance.entities.BaseFigure;
-import com.nikulitsa.springsandbox.modules.inheritance.entities.BeginFigure;
+import com.nikulitsa.springsandbox.modules.inheritance.dto.BlockDiagramLightWeightDTO;
 import com.nikulitsa.springsandbox.modules.inheritance.entities.BlockDiagram;
-import com.nikulitsa.springsandbox.modules.inheritance.entities.LinkFigure;
-import com.nikulitsa.springsandbox.modules.inheritance.repositories.BlockDiagramRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Page;
 
-import javax.persistence.EntityNotFoundException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 
 /**
  * @author Sergey Nikulitsa
  */
-@Service
-public class BlockDiagramService {
+public interface BlockDiagramService {
 
-    private final BlockDiagramRepository blockDiagramRepository;
+    BlockDiagram save(BlockDiagram blockDiagram);
 
-    @Autowired
-    public BlockDiagramService(BlockDiagramRepository blockDiagramRepository) {
-        this.blockDiagramRepository = blockDiagramRepository;
-    }
+    BlockDiagram edit(BlockDiagram blockDiagram);
 
-    //    public BlockDiagramDTO save(BlockDiagramDTO dto) {
-    //        return new BlockDiagramDTO(
-    //            blockDiagramRepository.save(fromDTO(dto))
-    //        );
-    //    }
+    void delete(Long originId);
 
-    public BlockDiagram save(BlockDiagram blockDiagram) {
-        return blockDiagramRepository.save(blockDiagram);
-    }
+    BlockDiagram restore(Long originId);
 
-    public void delete(Long id) {
-        blockDiagramRepository.deleteById(id);
-    }
+    void deleteVersion(Long versionId);
 
-    //    public BlockDiagramDTO get(Long id) {
-    //        BlockDiagram blockDiagram = blockDiagramRepository.findById(id)
-    //            .orElseThrow(() -> new EntityNotFoundException("Block Diagram with id=" + id + " not found."));
-    //        return new BlockDiagramDTO(blockDiagram);
-    //    }
+    BlockDiagram restoreVersion(Long versionId);
 
-    public BlockDiagram get(Long id) {
-        return blockDiagramRepository.findById(id)
-            .orElseThrow(() -> new EntityNotFoundException("Block Diagram with id=" + id + " not found."));
-    }
+    BlockDiagram get(Long originId);
 
-    private BlockDiagram fromDTO(BlockDiagramDTO blockDiagramDTO) {
-        return new BlockDiagram()
-            .setId(blockDiagramDTO.getId())
-            .setMarkup(blockDiagramDTO.getMarkup());
-        //.setFigures(fillFiguresList(blockDiagramDTO));
-    }
+    Collection<BlockDiagramLightWeightDTO> getVersions(Long originId);
 
-    private List<BaseFigure> fillFiguresList(BlockDiagramDTO blockDiagramDTO) {
-        List<BeginFigure> beginFigures = blockDiagramDTO.getBeginFigures();
-        List<ActionFigure> actionFigures = blockDiagramDTO.getActionFigures();
-        List<LinkFigure> linkFigures = blockDiagramDTO.getLinkFigures();
-        ArrayList<BaseFigure> figures = new ArrayList<>(
-            beginFigures.size() + actionFigures.size() + linkFigures.size()
-        );
-        figures.addAll(beginFigures);
-        figures.addAll(actionFigures);
-        figures.addAll(linkFigures);
-        return figures;
-    }
+    Page<BlockDiagram> getAllActive(int page, int pageSize);
+
+    Page<BlockDiagram> getAllDeleted(int page, int pageSize);
+
+    Collection<BlockDiagramLightWeightDTO> getDeletedVersions(Long originId);
 }

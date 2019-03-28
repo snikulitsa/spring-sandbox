@@ -51,4 +51,23 @@ public final class ExceptionFactory {
     public static Supplier<UsernameNotFoundException> usernameNotFoundExceptionSupplier(String username) {
         return () -> new UsernameNotFoundException("User: " + username + " does not exist");
     }
+
+    public static Supplier<EntityNotFoundException> entityNotFoundExceptionSupplier(Class<?> clazz, Long id) {
+        return () -> new EntityNotFoundException(clazz.getSimpleName() + " with id=" + id + " not found.");
+    }
+
+    public static IllegalArgumentException idMustBeNull(Class<?> clazz) {
+        return new IllegalArgumentException("ID must be NULL when create entity: " + clazz.getSimpleName());
+    }
+
+    public static IllegalArgumentException idMustNotBeNull(Class<?> clazz) {
+        return new IllegalArgumentException("ID must NOT be NULL when editing entity: " + clazz.getSimpleName());
+    }
+
+    public static IllegalArgumentException originIdMustNotBeNull(Class<?> clazz) {
+        return new IllegalArgumentException(
+            "ORIGIN ID must NOT be NULL when editing versioned entity: " +
+                clazz.getSimpleName()
+        );
+    }
 }

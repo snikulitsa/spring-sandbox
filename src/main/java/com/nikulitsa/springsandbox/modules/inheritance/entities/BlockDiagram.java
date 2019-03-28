@@ -1,11 +1,17 @@
 package com.nikulitsa.springsandbox.modules.inheritance.entities;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.nikulitsa.springsandbox.utils.InstantDeserializer;
+import com.nikulitsa.springsandbox.utils.InstantSerializer;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -13,6 +19,7 @@ import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 
@@ -28,9 +35,24 @@ public class BlockDiagram {
     @Column(name = "id")
     private Long id;
 
+    @Column(name = "title")
+    private String title;
+
     @Lob
     @Column(name = "markup")
     private String markup;
+
+    @Column(name = "creation_date")
+    @JsonSerialize(using = InstantSerializer.class)
+    @JsonDeserialize(using = InstantDeserializer.class)
+    private Instant creationDate;
+
+    @Column(name = "status")
+    @Enumerated(value = EnumType.STRING)
+    private BlockDiagramStatus status;
+
+    @Column(name = "origin_id")
+    private Long originId;
 
     @Fetch(FetchMode.SELECT)
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
@@ -48,9 +70,6 @@ public class BlockDiagram {
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<ConditionFigure> conditionFigures = Collections.emptyList();
 
-    //    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    //    private List<BaseFigure> figures = new ArrayList<>();
-
     public Long getId() {
         return id;
     }
@@ -60,12 +79,48 @@ public class BlockDiagram {
         return this;
     }
 
+    public String getTitle() {
+        return title;
+    }
+
+    public BlockDiagram setTitle(String title) {
+        this.title = title;
+        return this;
+    }
+
     public String getMarkup() {
         return markup;
     }
 
     public BlockDiagram setMarkup(String markup) {
         this.markup = markup;
+        return this;
+    }
+
+    public Instant getCreationDate() {
+        return creationDate;
+    }
+
+    public BlockDiagram setCreationDate(Instant creationDate) {
+        this.creationDate = creationDate;
+        return this;
+    }
+
+    public BlockDiagramStatus getStatus() {
+        return status;
+    }
+
+    public BlockDiagram setStatus(BlockDiagramStatus status) {
+        this.status = status;
+        return this;
+    }
+
+    public Long getOriginId() {
+        return originId;
+    }
+
+    public BlockDiagram setOriginId(Long originId) {
+        this.originId = originId;
         return this;
     }
 
@@ -105,12 +160,7 @@ public class BlockDiagram {
         return this;
     }
 
-    //    public List<BaseFigure> getFigures() {
-    //        return figures;
-    //    }
-    //
-    //    public BlockDiagram setFigures(List<BaseFigure> figures) {
-    //        this.figures = figures;
-    //        return this;
-    //    }
+    public void clearId() {
+        this.id = null;
+    }
 }

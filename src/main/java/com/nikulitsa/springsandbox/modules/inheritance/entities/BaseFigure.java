@@ -24,7 +24,7 @@ public abstract class BaseFigure {
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
+
     @Column(name = "title")
     private String title;
 
@@ -56,6 +56,10 @@ public abstract class BaseFigure {
     public BaseFigure setGraphicalId(String graphicalId) {
         this.graphicalId = graphicalId;
         return this;
+    }
+
+    public void clearId() {
+        this.id = null;
     }
 
     public abstract FigureType getFigureType();

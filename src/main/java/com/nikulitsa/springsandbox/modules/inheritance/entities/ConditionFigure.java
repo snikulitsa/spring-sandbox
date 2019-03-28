@@ -2,6 +2,7 @@ package com.nikulitsa.springsandbox.modules.inheritance.entities;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import javax.persistence.Transient;
 
 /**
  * @author Sergey Nikulitsa
@@ -9,7 +10,8 @@ import javax.persistence.Entity;
 @Entity
 @DiscriminatorValue(value = FigureType.Values.CONDITION)
 public class ConditionFigure extends BaseFigure {
-    
+
+    @Transient
     private final FigureType figureType = FigureType.CONDITION;
 
     private String conditionTrueLink;
