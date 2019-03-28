@@ -114,6 +114,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
             .antMatchers(
                 "/api/registration/mail",
                 "/api/ldap/**",
+                "/api/blockDiagram/**",
                 "/files/**"
             ).permitAll()
             .anyRequest().authenticated();

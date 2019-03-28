@@ -5,4 +5,8 @@
 <suppressions>
     <suppress checks="." files="com.nikulitsa.springsandbox.entities.ldap.LdapFields"/>
     <suppress checks="." files="com.nikulitsa.springsandbox.SpringSandboxApplication"/>
+    <suppress
+            checks="LineLengthCheck"
+            files="com.nikulitsa.springsandbox.modules.inheritance.repositories.BlockDiagramRepository"
+    />
 </suppressions>
